@@ -27,7 +27,11 @@ function renderToken(token) {
   }
 
   try {
-    return katex.renderToString(tex, { throwOnError: false, displayMode, strict: false });
+    return katex.renderToString(tex, {
+      throwOnError: false,
+      displayMode,
+      strict: false,
+    });
   } catch {
     return escapeHtml(token);
   }
@@ -35,11 +39,15 @@ function renderToken(token) {
 
 export function mathToHtml(text) {
   const source = String(text ?? '');
-  const regex = /(\$\$[\s\S]+?\$\$|\$[^$\n]+?\$|\\\[[\s\S]+?\\\]|\\\([\s\S]+?\\\))/g;
+  const regex =
+    /(\$\$[\s\S]+?\$\$|\$[^$\n]+?\$|\\\[[\s\S]+?\\\]|\\\([\s\S]+?\\\))/g;
   let html = '';
   let cursor = 0;
   for (const match of source.matchAll(regex)) {
-    html += escapeHtml(source.slice(cursor, match.index)).replace(/\n/g, '<br />');
+    html += escapeHtml(source.slice(cursor, match.index)).replace(
+      /\n/g,
+      '<br />'
+    );
     html += renderToken(match[0]);
     cursor = match.index + match[0].length;
   }
@@ -48,5 +56,10 @@ export function mathToHtml(text) {
 }
 
 export function MathText({ text, className = '' }) {
-  return <div className={className} dangerouslySetInnerHTML={{ __html: mathToHtml(text) }} />;
+  return (
+    <div
+      className={className}
+      dangerouslySetInnerHTML={{ __html: mathToHtml(text) }}
+    />
+  );
 }

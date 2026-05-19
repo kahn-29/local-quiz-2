@@ -29,7 +29,12 @@ import {
   storageSizeLabel,
   upsertQuiz,
 } from './storage.js';
-import { downloadJson, importQuizFile, readFileAsDataUrl, safeFileName } from './fileUtils.js';
+import {
+  downloadJson,
+  importQuizFile,
+  readFileAsDataUrl,
+  safeFileName,
+} from './fileUtils.js';
 
 const DEFAULT_SETTINGS = {
   shuffleQuestions: false,
@@ -55,7 +60,10 @@ function useToasts() {
   function push(message, type = 'info') {
     const id = makeId('toast');
     setToasts((items) => [...items, { id, message, type }]);
-    setTimeout(() => setToasts((items) => items.filter((item) => item.id !== id)), 3500);
+    setTimeout(
+      () => setToasts((items) => items.filter((item) => item.id !== id)),
+      3500
+    );
   }
   return { toasts, push };
 }
@@ -63,7 +71,11 @@ function useToasts() {
 function Toasts({ toasts }) {
   return (
     <div className="toasts" aria-live="polite">
-      {toasts.map((toast) => <div key={toast.id} className={`toast ${toast.type}`}>{toast.message}</div>)}
+      {toasts.map((toast) => (
+        <div key={toast.id} className={`toast ${toast.type}`}>
+          {toast.message}
+        </div>
+      ))}
     </div>
   );
 }
@@ -119,7 +131,10 @@ function App() {
       const quiz = await importQuizFile(file);
       const result = upsertQuiz(quiz);
       if (!result.ok) {
-        push('Imported, but localStorage quota was exceeded. You can still download the file after editing.', 'warn');
+        push(
+          'Imported, but localStorage quota was exceeded. You can still download the file after editing.',
+          'warn'
+        );
       } else {
         refreshLibrary(result.library);
         push('Quiz imported into local library.', 'success');
@@ -201,32 +216,58 @@ function App() {
           result={lastResult}
           onHome={() => setView('home')}
           onReplay={() => setView('settings')}
-          onDownload={() => downloadJson(lastResult, safeFileName(`${lastResult.quizTitle}-result`))}
+          onDownload={() =>
+            downloadJson(
+              lastResult,
+              safeFileName(`${lastResult.quizTitle}-result`)
+            )
+          }
         />
       )}
     </>
   );
 }
 
-function Home({ library, onCreate, onImport, onEdit, onPlay, onDelete, onDownload }) {
+function Home({
+  library,
+  onCreate,
+  onImport,
+  onEdit,
+  onPlay,
+  onDelete,
+  onDownload,
+}) {
   return (
     <main className="shell home-shell">
       <section className="hero panel">
         <div>
           <p className="eyebrow">Local-first React Vite quiz app</p>
           <h1>Kahn Quiz Local</h1>
-          <p className="lead">Create, play, save, import, and export quizzes entirely inside your browser. No backend. No database. No account.</p>
+          <p className="lead">
+            Create, play, save, import, and export quizzes entirely inside your
+            browser. No backend. No database. No account.
+          </p>
         </div>
         <div className="hero-actions">
-          <button className="btn primary big" onClick={onCreate}>＋ Create quiz</button>
+          <button className="btn primary big" onClick={onCreate}>
+            ＋ Create quiz
+          </button>
           <label className="btn ghost big file-label">
             ⬆ Import JSON
-            <input type="file" accept=".json,application/json" onChange={(e) => onImport(e, 'editor')} />
+            <input
+              type="file"
+              accept=".json,application/json"
+              onChange={(e) => onImport(e, 'editor')}
+            />
           </label>
         </div>
         <div className="status-strip">
-          <span>Saved quizzes: <strong>{library.length}</strong></span>
-          <span>Browser storage used: <strong>{storageSizeLabel()}</strong></span>
+          <span>
+            Saved quizzes: <strong>{library.length}</strong>
+          </span>
+          <span>
+            Browser storage used: <strong>{storageSizeLabel()}</strong>
+          </span>
           <span>Images are embedded as Data URLs in exported JSON.</span>
         </div>
       </section>
@@ -238,15 +279,24 @@ function Home({ library, onCreate, onImport, onEdit, onPlay, onDelete, onDownloa
         </div>
         <label className="btn secondary file-label">
           Import & play
-          <input type="file" accept=".json,application/json" onChange={(e) => onImport(e, 'play')} />
+          <input
+            type="file"
+            accept=".json,application/json"
+            onChange={(e) => onImport(e, 'play')}
+          />
         </label>
       </section>
 
       {library.length === 0 ? (
         <section className="empty panel">
           <h3>No saved quiz yet</h3>
-          <p>Start with a new quiz, or import a JSON file exported from this app or your old HTML version.</p>
-          <button className="btn primary" onClick={onCreate}>Create first quiz</button>
+          <p>
+            Start with a new quiz, or import a JSON file exported from this app
+            or your old HTML version.
+          </p>
+          <button className="btn primary" onClick={onCreate}>
+            Create first quiz
+          </button>
         </section>
       ) : (
         <section className="quiz-grid">
@@ -254,20 +304,41 @@ function Home({ library, onCreate, onImport, onEdit, onPlay, onDelete, onDownloa
             <article key={quiz.id} className="quiz-card panel">
               <div className="card-top">
                 <span className="badge">{quiz.questions.length} questions</span>
-                <span className="muted">{new Date(quiz.updatedAt).toLocaleString()}</span>
+                <span className="muted">
+                  {new Date(quiz.updatedAt).toLocaleString()}
+                </span>
               </div>
               <h3>{quiz.title}</h3>
               <p>{quiz.description || 'No description yet.'}</p>
               <div className="mini-list">
-                <span>{quiz.questions.filter((q) => q.type === 'single').length} single</span>
-                <span>{quiz.questions.filter((q) => q.type === 'multi').length} multi</span>
-                <span>{quiz.questions.filter((q) => q.type === 'text').length} text</span>
+                <span>
+                  {quiz.questions.filter((q) => q.type === 'single').length}{' '}
+                  single
+                </span>
+                <span>
+                  {quiz.questions.filter((q) => q.type === 'multi').length}{' '}
+                  multi
+                </span>
+                <span>
+                  {quiz.questions.filter((q) => q.type === 'text').length} text
+                </span>
               </div>
               <div className="card-actions">
-                <button className="btn primary" onClick={() => onPlay(quiz)}>Play</button>
-                <button className="btn secondary" onClick={() => onEdit(quiz)}>Edit</button>
-                <button className="btn ghost" onClick={() => onDownload(quiz)}>Download</button>
-                <button className="btn danger" onClick={() => onDelete(quiz.id)}>Delete</button>
+                <button className="btn primary" onClick={() => onPlay(quiz)}>
+                  Play
+                </button>
+                <button className="btn secondary" onClick={() => onEdit(quiz)}>
+                  Edit
+                </button>
+                <button className="btn ghost" onClick={() => onDownload(quiz)}>
+                  Download
+                </button>
+                <button
+                  className="btn danger"
+                  onClick={() => onDelete(quiz.id)}
+                >
+                  Delete
+                </button>
               </div>
             </article>
           ))}
@@ -277,7 +348,15 @@ function Home({ library, onCreate, onImport, onEdit, onPlay, onDelete, onDownloa
   );
 }
 
-function Editor({ quiz, setQuiz, onBack, onSaved, onDownload, onPlay, notify }) {
+function Editor({
+  quiz,
+  setQuiz,
+  onBack,
+  onSaved,
+  onDownload,
+  onPlay,
+  notify,
+}) {
   const errors = useMemo(() => validateQuiz(quiz), [quiz]);
 
   useEffect(() => {
@@ -293,30 +372,50 @@ function Editor({ quiz, setQuiz, onBack, onSaved, onDownload, onPlay, notify }) 
     setQuiz((current) => ({
       ...current,
       updatedAt: nowIso(),
-      questions: current.questions.map((q) => q.id === questionId ? { ...q, ...patch } : q),
+      questions: current.questions.map((q) =>
+        q.id === questionId ? { ...q, ...patch } : q
+      ),
     }));
   }
 
   function normalizeAfterTypeChange(question, type) {
     if (type === 'text') {
-      return { ...question, type, options: [], correctOptionIds: [], correctText: question.correctText || '' };
+      return {
+        ...question,
+        type,
+        options: [],
+        correctOptionIds: [],
+        correctText: question.correctText || '',
+      };
     }
-    const options = question.options.length >= 2 ? question.options : [newOption('Option 1'), newOption('Option 2')];
+    const options =
+      question.options.length >= 2
+        ? question.options
+        : [newOption('Option 1'), newOption('Option 2')];
     const validIds = new Set(options.map((opt) => opt.id));
-    let correctOptionIds = (question.correctOptionIds || []).filter((id) => validIds.has(id));
-    if (type === 'single') correctOptionIds = [correctOptionIds[0] || options[0].id];
+    let correctOptionIds = (question.correctOptionIds || []).filter((id) =>
+      validIds.has(id)
+    );
+    if (type === 'single')
+      correctOptionIds = [correctOptionIds[0] || options[0].id];
     return { ...question, type, options, correctOptionIds };
   }
 
   function save() {
     const currentErrors = validateQuiz(quiz);
     if (currentErrors.length) {
-      notify(`Fix ${currentErrors.length} validation issue(s) before saving.`, 'error');
+      notify(
+        `Fix ${currentErrors.length} validation issue(s) before saving.`,
+        'error'
+      );
       return null;
     }
     const result = upsertQuiz(quiz);
     if (!result.ok) {
-      notify('Cannot save to localStorage. The quiz may be too large because of embedded images. Try downloading it instead.', 'error');
+      notify(
+        'Cannot save to localStorage. The quiz may be too large because of embedded images. Try downloading it instead.',
+        'error'
+      );
       return null;
     }
     clearEditorDraft();
@@ -327,14 +426,25 @@ function Editor({ quiz, setQuiz, onBack, onSaved, onDownload, onPlay, notify }) 
   return (
     <main className="shell editor-shell">
       <div className="sticky-bar panel">
-        <button className="btn ghost" onClick={onBack}>← Home</button>
+        <button className="btn ghost" onClick={onBack}>
+          ← Home
+        </button>
         <div className="spacer" />
-        <button className="btn secondary" onClick={() => onDownload(quiz)}>Download JSON</button>
-        <button className="btn primary" onClick={save}>Save local</button>
-        <button className="btn dark" onClick={() => {
-          const saved = errors.length ? null : save();
-          if (saved) onPlay(saved);
-        }}>Save & play</button>
+        <button className="btn secondary" onClick={() => onDownload(quiz)}>
+          Download JSON
+        </button>
+        <button className="btn primary" onClick={save}>
+          Save local
+        </button>
+        <button
+          className="btn dark"
+          onClick={() => {
+            const saved = errors.length ? null : save();
+            if (saved) onPlay(saved);
+          }}
+        >
+          Save & play
+        </button>
       </div>
 
       <section className="panel editor-head">
@@ -351,18 +461,31 @@ function Editor({ quiz, setQuiz, onBack, onSaved, onDownload, onPlay, notify }) 
       {errors.length > 0 && (
         <section className="panel warning-list">
           <h3>Things to fix</h3>
-          <ul>{errors.map((err) => <li key={err}>{err}</li>)}</ul>
+          <ul>
+            {errors.map((err) => (
+              <li key={err}>{err}</li>
+            ))}
+          </ul>
         </section>
       )}
 
       <section className="panel form-panel">
         <label>
           <span>Title</span>
-          <input value={quiz.title} onChange={(e) => updateQuiz({ title: e.target.value })} placeholder="Quiz title" />
+          <input
+            value={quiz.title}
+            onChange={(e) => updateQuiz({ title: e.target.value })}
+            placeholder="Quiz title"
+          />
         </label>
         <label>
           <span>Description</span>
-          <textarea value={quiz.description} onChange={(e) => updateQuiz({ description: e.target.value })} placeholder="Optional description" rows={3} />
+          <textarea
+            value={quiz.description}
+            onChange={(e) => updateQuiz({ description: e.target.value })}
+            placeholder="Optional description"
+            rows={3}
+          />
         </label>
       </section>
 
@@ -373,34 +496,68 @@ function Editor({ quiz, setQuiz, onBack, onSaved, onDownload, onPlay, notify }) 
             question={question}
             index={index}
             onChange={(patch) => updateQuestion(question.id, patch)}
-            onTypeChange={(type) => setQuiz((current) => ({
-              ...current,
-              updatedAt: nowIso(),
-              questions: current.questions.map((q) => q.id === question.id ? normalizeAfterTypeChange(q, type) : q),
-            }))}
-            onRemove={() => setQuiz((current) => ({
-              ...current,
-              updatedAt: nowIso(),
-              questions: current.questions.length === 1 ? current.questions : current.questions.filter((q) => q.id !== question.id),
-            }))}
-            onDuplicate={() => setQuiz((current) => ({
-              ...current,
-              updatedAt: nowIso(),
-              questions: current.questions.flatMap((q) => q.id === question.id ? [q, { ...JSON.parse(JSON.stringify(q)), id: makeId('q') }] : [q]),
-            }))}
+            onTypeChange={(type) =>
+              setQuiz((current) => ({
+                ...current,
+                updatedAt: nowIso(),
+                questions: current.questions.map((q) =>
+                  q.id === question.id ? normalizeAfterTypeChange(q, type) : q
+                ),
+              }))
+            }
+            onRemove={() =>
+              setQuiz((current) => ({
+                ...current,
+                updatedAt: nowIso(),
+                questions:
+                  current.questions.length === 1
+                    ? current.questions
+                    : current.questions.filter((q) => q.id !== question.id),
+              }))
+            }
+            onDuplicate={() =>
+              setQuiz((current) => ({
+                ...current,
+                updatedAt: nowIso(),
+                questions: current.questions.flatMap((q) =>
+                  q.id === question.id
+                    ? [q, { ...JSON.parse(JSON.stringify(q)), id: makeId('q') }]
+                    : [q]
+                ),
+              }))
+            }
             notify={notify}
           />
         ))}
       </section>
 
       <div className="bottom-actions">
-        <button className="btn primary big" onClick={() => setQuiz((current) => ({ ...current, questions: [...current.questions, newQuestion('single')], updatedAt: nowIso() }))}>＋ Add question</button>
+        <button
+          className="btn primary big"
+          onClick={() =>
+            setQuiz((current) => ({
+              ...current,
+              questions: [...current.questions, newQuestion('single')],
+              updatedAt: nowIso(),
+            }))
+          }
+        >
+          ＋ Add question
+        </button>
       </div>
     </main>
   );
 }
 
-function QuestionEditor({ question, index, onChange, onTypeChange, onRemove, onDuplicate, notify }) {
+function QuestionEditor({
+  question,
+  index,
+  onChange,
+  onTypeChange,
+  onRemove,
+  onDuplicate,
+  notify,
+}) {
   async function handleImage(file) {
     if (!file) return;
     if (!file.type.startsWith('image/')) {
@@ -412,7 +569,9 @@ function QuestionEditor({ question, index, onChange, onTypeChange, onRemove, onD
   }
 
   function updateOption(optionId, text) {
-    const options = question.options.map((opt) => opt.id === optionId ? { ...opt, text } : opt);
+    const options = question.options.map((opt) =>
+      opt.id === optionId ? { ...opt, text } : opt
+    );
     onChange({ options });
   }
 
@@ -422,8 +581,11 @@ function QuestionEditor({ question, index, onChange, onTypeChange, onRemove, onD
       return;
     }
     const options = question.options.filter((opt) => opt.id !== optionId);
-    let correctOptionIds = question.correctOptionIds.filter((id) => id !== optionId);
-    if (question.type === 'single' && correctOptionIds.length === 0) correctOptionIds = [options[0].id];
+    let correctOptionIds = question.correctOptionIds.filter(
+      (id) => id !== optionId
+    );
+    if (question.type === 'single' && correctOptionIds.length === 0)
+      correctOptionIds = [options[0].id];
     onChange({ options, correctOptionIds });
   }
 
@@ -440,7 +602,9 @@ function QuestionEditor({ question, index, onChange, onTypeChange, onRemove, onD
   }
 
   function appendFormula(snippet) {
-    onChange({ content: `${question.content}${question.content ? ' ' : ''}${snippet}` });
+    onChange({
+      content: `${question.content}${question.content ? ' ' : ''}${snippet}`,
+    });
   }
 
   return (
@@ -448,86 +612,181 @@ function QuestionEditor({ question, index, onChange, onTypeChange, onRemove, onD
       <header className="question-editor-header">
         <div>
           <span className="badge">Question {index + 1}</span>
-          <select value={question.type} onChange={(e) => onTypeChange(e.target.value)}>
+          <select
+            value={question.type}
+            onChange={(e) => onTypeChange(e.target.value)}
+          >
             <option value="single">Single choice</option>
             <option value="multi">Multiple choice</option>
             <option value="text">Text input</option>
           </select>
         </div>
         <div className="row-actions">
-          <button className="btn ghost" onClick={onDuplicate}>Duplicate</button>
-          <button className="btn danger" onClick={onRemove}>Remove</button>
+          <button className="btn ghost" onClick={onDuplicate}>
+            Duplicate
+          </button>
+          <button className="btn danger" onClick={onRemove}>
+            Remove
+          </button>
         </div>
       </header>
 
       <label className="wide-label">
         <span>Question content</span>
-        <textarea value={question.content} onChange={(e) => onChange({ content: e.target.value })} rows={4} placeholder="Type the question. Math supports $...$, $$...$$, \(...\), \[...\]." />
+        <textarea
+          value={question.content}
+          onChange={(e) => onChange({ content: e.target.value })}
+          rows={4}
+          placeholder="Type the question. Math supports $...$, $$...$$, \(...\), \[...\]."
+        />
       </label>
 
       <div className="formula-row">
-        {FORMULA_SNIPPETS.map(([label, snippet]) => <button key={label} className="chip" onClick={() => appendFormula(snippet)}>{label}</button>)}
+        {FORMULA_SNIPPETS.map(([label, snippet]) => (
+          <button
+            key={label}
+            className="chip"
+            onClick={() => appendFormula(snippet)}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       <div className="preview-box">
         <small>Preview</small>
-        <MathText text={question.content || 'Question preview will appear here.'} />
+        <MathText
+          text={question.content || 'Question preview will appear here.'}
+        />
       </div>
 
       <div className="image-box">
         <div>
           <strong>Image</strong>
-          <p>Images are converted to Data URLs and embedded into the downloaded JSON.</p>
+          <p>
+            Images are converted to Data URLs and embedded into the downloaded
+            JSON.
+          </p>
         </div>
         <div className="image-actions">
           <label className="btn secondary file-label">
             Choose image
-            <input type="file" accept="image/*" onChange={(e) => handleImage(e.target.files?.[0])} />
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleImage(e.target.files?.[0])}
+            />
           </label>
-          {question.imageDataUrl && <button className="btn ghost" onClick={() => onChange({ imageDataUrl: '' })}>Clear</button>}
+          {question.imageDataUrl && (
+            <button
+              className="btn ghost"
+              onClick={() => onChange({ imageDataUrl: '' })}
+            >
+              Clear
+            </button>
+          )}
         </div>
-        {question.imageDataUrl && <img className="question-image-preview" src={question.imageDataUrl} alt="Question preview" />}
+        {question.imageDataUrl && (
+          <img
+            className="question-image-preview"
+            src={question.imageDataUrl}
+            alt="Question preview"
+          />
+        )}
       </div>
 
       {question.type === 'text' ? (
         <label className="wide-label">
-          <span>Correct text answer <em>Use || to separate accepted alternatives.</em></span>
-          <input value={question.correctText} onChange={(e) => onChange({ correctText: e.target.value })} placeholder="Example: Ho Chi Minh || Hồ Chí Minh" />
+          <span>
+            Correct text answer{' '}
+            <em>Use || to separate accepted alternatives.</em>
+          </span>
+          <input
+            value={question.correctText}
+            onChange={(e) => onChange({ correctText: e.target.value })}
+            placeholder="Example: Ho Chi Minh || Hồ Chí Minh"
+          />
         </label>
       ) : (
         <div className="options-editor">
           <div className="option-head">
             <h4>Options</h4>
-            <button className="btn secondary" onClick={() => onChange({ options: [...question.options, newOption(`Option ${question.options.length + 1}`)] })}>＋ Add option</button>
+            <button
+              className="btn secondary"
+              onClick={() =>
+                onChange({
+                  options: [
+                    ...question.options,
+                    newOption(`Option ${question.options.length + 1}`),
+                  ],
+                })
+              }
+            >
+              ＋ Add option
+            </button>
           </div>
           {question.options.map((option, optIndex) => (
             <div key={option.id} className="option-edit-row">
-              <button className={`answer-mark ${question.correctOptionIds.includes(option.id) ? 'active' : ''}`} onClick={() => toggleCorrect(option.id)} title="Mark as correct">
+              <button
+                className={`answer-mark ${question.correctOptionIds.includes(option.id) ? 'active' : ''}`}
+                onClick={() => toggleCorrect(option.id)}
+                title="Mark as correct"
+              >
                 {question.type === 'single' ? '○' : '✓'}
               </button>
-              <span className="option-letter">{String.fromCharCode(65 + optIndex)}</span>
-              <input value={option.text} onChange={(e) => updateOption(option.id, e.target.value)} placeholder={`Option ${optIndex + 1}`} />
-              <button className="icon-btn" onClick={() => removeOption(option.id)}>×</button>
+              <span className="option-letter">
+                {String.fromCharCode(65 + optIndex)}
+              </span>
+              <input
+                value={option.text}
+                onChange={(e) => updateOption(option.id, e.target.value)}
+                placeholder={`Option ${optIndex + 1}`}
+              />
+              <button
+                className="icon-btn"
+                onClick={() => removeOption(option.id)}
+              >
+                ×
+              </button>
             </div>
           ))}
-          <p className="hint">Click the left marker to choose the correct answer. Option IDs are stable, so shuffling answers will not break scoring.</p>
+          <p className="hint">
+            Click the left marker to choose the correct answer. Option IDs are
+            stable, so shuffling answers will not break scoring.
+          </p>
         </div>
       )}
 
       <label className="wide-label">
-        <span>Explanation after submit <em>optional</em></span>
-        <textarea value={question.explanation} onChange={(e) => onChange({ explanation: e.target.value })} rows={2} placeholder="Why is this the answer?" />
+        <span>
+          Explanation after submit <em>optional</em>
+        </span>
+        <textarea
+          value={question.explanation}
+          onChange={(e) => onChange({ explanation: e.target.value })}
+          rows={2}
+          placeholder="Why is this the answer?"
+        />
       </label>
     </article>
   );
 }
 
-function PlaySettings({ quiz, settings, setSettings, onBack, onEdit, onStart }) {
+function PlaySettings({
+  quiz,
+  settings,
+  setSettings,
+  onBack,
+  onEdit,
+  onStart,
+}) {
   const canStart = validateQuiz(quiz).length === 0;
   return (
     <main className="shell narrow-shell">
       <section className="panel settings-panel">
-        <button className="btn ghost" onClick={onBack}>← Home</button>
+        <button className="btn ghost" onClick={onBack}>
+          ← Home
+        </button>
         <div className="center-title">
           <p className="eyebrow">Play setup</p>
           <h1>{quiz.title}</h1>
@@ -535,21 +794,70 @@ function PlaySettings({ quiz, settings, setSettings, onBack, onEdit, onStart }) 
         </div>
 
         <div className="settings-grid">
-          <Toggle label="Shuffle questions" checked={settings.shuffleQuestions} onChange={(value) => setSettings({ ...settings, shuffleQuestions: value })} />
-          <Toggle label="Shuffle answers" checked={settings.shuffleAnswers} onChange={(value) => setSettings({ ...settings, shuffleAnswers: value })} />
-          <Toggle label="Allow instant check" checked={settings.allowCheck} onChange={(value) => setSettings({ ...settings, allowCheck: value, allowRedo: value ? settings.allowRedo : false })} />
-          <Toggle label="Allow re-select after check" checked={settings.allowRedo} disabled={!settings.allowCheck} onChange={(value) => setSettings({ ...settings, allowRedo: value })} />
+          <Toggle
+            label="Shuffle questions"
+            checked={settings.shuffleQuestions}
+            onChange={(value) =>
+              setSettings({ ...settings, shuffleQuestions: value })
+            }
+          />
+          <Toggle
+            label="Shuffle answers"
+            checked={settings.shuffleAnswers}
+            onChange={(value) =>
+              setSettings({ ...settings, shuffleAnswers: value })
+            }
+          />
+          <Toggle
+            label="Allow instant check"
+            checked={settings.allowCheck}
+            onChange={(value) =>
+              setSettings({
+                ...settings,
+                allowCheck: value,
+                allowRedo: value ? settings.allowRedo : false,
+              })
+            }
+          />
+          <Toggle
+            label="Allow re-select after check"
+            checked={settings.allowRedo}
+            disabled={!settings.allowCheck}
+            onChange={(value) => setSettings({ ...settings, allowRedo: value })}
+          />
         </div>
 
         <label>
-          <span>Time limit in minutes <em>optional</em></span>
-          <input type="number" min="1" value={settings.timeLimitMinutes} onChange={(e) => setSettings({ ...settings, timeLimitMinutes: e.target.value })} placeholder="Leave blank for no timer" />
+          <span>
+            Time limit in minutes <em>optional</em>
+          </span>
+          <input
+            type="number"
+            min="1"
+            value={settings.timeLimitMinutes}
+            onChange={(e) =>
+              setSettings({ ...settings, timeLimitMinutes: e.target.value })
+            }
+            placeholder="Leave blank for no timer"
+          />
         </label>
 
-        {!canStart && <p className="error-text">This quiz has validation issues. Edit it before playing.</p>}
+        {!canStart && (
+          <p className="error-text">
+            This quiz has validation issues. Edit it before playing.
+          </p>
+        )}
         <div className="footer-actions">
-          <button className="btn secondary" onClick={onEdit}>Edit quiz</button>
-          <button className="btn primary big" disabled={!canStart} onClick={onStart}>Start quiz</button>
+          <button className="btn secondary" onClick={onEdit}>
+            Edit quiz
+          </button>
+          <button
+            className="btn primary big"
+            disabled={!canStart}
+            onClick={onStart}
+          >
+            Start quiz
+          </button>
         </div>
       </section>
     </main>
@@ -559,7 +867,12 @@ function PlaySettings({ quiz, settings, setSettings, onBack, onEdit, onStart }) 
 function Toggle({ label, checked, onChange, disabled = false }) {
   return (
     <label className={`toggle ${disabled ? 'disabled' : ''}`}>
-      <input type="checkbox" checked={checked} disabled={disabled} onChange={(e) => onChange(e.target.checked)} />
+      <input
+        type="checkbox"
+        checked={checked}
+        disabled={disabled}
+        onChange={(e) => onChange(e.target.checked)}
+      />
       <span>{label}</span>
     </label>
   );
@@ -568,20 +881,33 @@ function Toggle({ label, checked, onChange, disabled = false }) {
 function Player({ quiz, settings, onExit, onEdit, onFinish, notify }) {
   const [questions] = useState(() => prepareQuestions(quiz, settings));
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState(() => Object.fromEntries(quiz.questions.map((q) => [q.id, emptyAnswerFor(q)])));
+  const [answers, setAnswers] = useState(() =>
+    Object.fromEntries(quiz.questions.map((q) => [q.id, emptyAnswerFor(q)]))
+  );
   const [checks, setChecks] = useState({});
   const [startedAt] = useState(nowIso());
-  const initialSeconds = Number(settings.timeLimitMinutes) > 0 ? Math.max(1, Number(settings.timeLimitMinutes)) * 60 : null;
+  const initialSeconds =
+    Number(settings.timeLimitMinutes) > 0
+      ? Math.max(1, Number(settings.timeLimitMinutes)) * 60
+      : null;
   const [remaining, setRemaining] = useState(initialSeconds);
 
   const question = questions[currentIndex];
   const answer = answers[question.id] ?? emptyAnswerFor(question);
   const check = checks[question.id];
   const locked = check?.locked || false;
-  const answeredCount = questions.filter((q) => isAnswered(q, answers[q.id])).length;
+  const answeredCount = questions.filter((q) =>
+    isAnswered(q, answers[q.id])
+  ).length;
 
   useEffect(() => {
-    saveActiveSession({ quizId: quiz.id, answers, checks, currentIndex, updatedAt: nowIso() });
+    saveActiveSession({
+      quizId: quiz.id,
+      answers,
+      checks,
+      currentIndex,
+      updatedAt: nowIso(),
+    });
   }, [quiz.id, answers, checks, currentIndex]);
 
   useEffect(() => {
@@ -591,7 +917,10 @@ function Player({ quiz, settings, onExit, onEdit, onFinish, notify }) {
       submit();
       return undefined;
     }
-    const timer = setInterval(() => setRemaining((sec) => Math.max(0, sec - 1)), 1000);
+    const timer = setInterval(
+      () => setRemaining((sec) => Math.max(0, sec - 1)),
+      1000
+    );
     return () => clearInterval(timer);
   }, [remaining]);
 
@@ -599,13 +928,20 @@ function Player({ quiz, settings, onExit, onEdit, onFinish, notify }) {
     if (locked) return;
     setAnswers((current) => ({ ...current, [question.id]: value }));
     if (checks[question.id] && settings.allowRedo) {
-      setChecks((current) => ({ ...current, [question.id]: { ...current[question.id], result: null, locked: false } }));
+      setChecks((current) => ({
+        ...current,
+        [question.id]: { ...current[question.id], result: null, locked: false },
+      }));
     }
   }
 
   function toggleMulti(optionId) {
     const current = Array.isArray(answer) ? answer : [];
-    updateAnswer(current.includes(optionId) ? current.filter((id) => id !== optionId) : [...current, optionId]);
+    updateAnswer(
+      current.includes(optionId)
+        ? current.filter((id) => id !== optionId)
+        : [...current, optionId]
+    );
   }
 
   function checkAnswer() {
@@ -622,59 +958,133 @@ function Player({ quiz, settings, onExit, onEdit, onFinish, notify }) {
   }
 
   function submit() {
-    const result = createResultPayload({ quiz, questions, answers, checks, settings, startedAt });
+    const result = createResultPayload({
+      quiz,
+      questions,
+      answers,
+      checks,
+      settings,
+      startedAt,
+    });
     onFinish(result);
   }
 
-  const timerText = remaining === null
-    ? 'No timer'
-    : `${String(Math.floor(remaining / 60)).padStart(2, '0')}:${String(remaining % 60).padStart(2, '0')}`;
+  const timerText =
+    remaining === null
+      ? 'No timer'
+      : `${String(Math.floor(remaining / 60)).padStart(2, '0')}:${String(remaining % 60).padStart(2, '0')}`;
 
   return (
     <main className="player-layout">
       <aside className="side-panel">
         <div className="timer-box">{timerText}</div>
         <h2>{quiz.title}</h2>
-        <p>{answeredCount}/{questions.length} answered</p>
+        <p>
+          {answeredCount}/{questions.length} answered
+        </p>
         <div className="question-nav">
           {questions.map((q, idx) => {
             const answered = isAnswered(q, answers[q.id]);
-            const state = checks[q.id]?.result === true ? 'correct' : checks[q.id]?.result === false ? 'wrong' : answered ? 'answered' : '';
-            return <button key={q.id} className={`${idx === currentIndex ? 'current' : ''} ${state}`} onClick={() => setCurrentIndex(idx)}>{idx + 1}</button>;
+            const state =
+              checks[q.id]?.result === true
+                ? 'correct'
+                : checks[q.id]?.result === false
+                  ? 'wrong'
+                  : answered
+                    ? 'answered'
+                    : '';
+            return (
+              <button
+                key={q.id}
+                className={`${idx === currentIndex ? 'current' : ''} ${state}`}
+                onClick={() => setCurrentIndex(idx)}
+              >
+                {idx + 1}
+              </button>
+            );
           })}
         </div>
         <div className="side-actions">
-          <button className="btn secondary" onClick={onEdit}>Edit quiz</button>
-          <button className="btn dark" onClick={() => { if (confirm('Submit quiz now?')) submit(); }}>Submit</button>
-          <button className="btn ghost" onClick={() => { if (confirm('Exit this quiz? Current attempt will be lost.')) onExit(); }}>Exit</button>
+          <button className="btn secondary" onClick={onEdit}>
+            Edit quiz
+          </button>
+          <button
+            className="btn dark"
+            onClick={() => {
+              if (confirm('Submit quiz now?')) submit();
+            }}
+          >
+            Submit
+          </button>
+          <button
+            className="btn ghost"
+            onClick={() => {
+              if (confirm('Exit this quiz? Current attempt will be lost.'))
+                onExit();
+            }}
+          >
+            Exit
+          </button>
         </div>
       </aside>
 
       <section className="play-area">
         <article className="panel question-card">
           <div className="question-meta">
-            <span className="badge">Question {currentIndex + 1} of {questions.length}</span>
-            <span className="badge soft">{question.type === 'single' ? 'Single choice' : question.type === 'multi' ? 'Multiple choice' : 'Text input'}</span>
+            <span className="badge">
+              Question {currentIndex + 1} of {questions.length}
+            </span>
+            <span className="badge soft">
+              {question.type === 'single'
+                ? 'Single choice'
+                : question.type === 'multi'
+                  ? 'Multiple choice'
+                  : 'Text input'}
+            </span>
           </div>
           <MathText text={question.content} className="question-content" />
-          {question.imageDataUrl && <img className="play-image" src={question.imageDataUrl} alt="Question" />}
+          {question.imageDataUrl && (
+            <img
+              className="play-image"
+              src={question.imageDataUrl}
+              alt="Question"
+            />
+          )}
 
           {question.type === 'text' ? (
-            <input className="answer-input" value={answer} readOnly={locked} onChange={(e) => updateAnswer(e.target.value)} placeholder="Type your answer" />
+            <input
+              className="answer-input"
+              value={answer}
+              readOnly={locked}
+              onChange={(e) => updateAnswer(e.target.value)}
+              placeholder="Type your answer"
+            />
           ) : (
             <div className="option-list">
               {question.options.map((option, idx) => {
-                const selected = question.type === 'single' ? answer === option.id : Array.isArray(answer) && answer.includes(option.id);
+                const selected =
+                  question.type === 'single'
+                    ? answer === option.id
+                    : Array.isArray(answer) && answer.includes(option.id);
                 const correct = question.correctOptionIds.includes(option.id);
-                const reveal = check?.result !== null && check?.result !== undefined;
+                const reveal =
+                  settings.allowCheck &&
+                  check?.result !== null &&
+                  check?.result !== undefined;
                 return (
                   <button
                     key={option.id}
                     className={`option-card ${selected ? 'selected' : ''} ${reveal && correct ? 'reveal-correct' : ''} ${reveal && selected && !correct ? 'reveal-wrong' : ''}`}
                     disabled={locked}
-                    onClick={() => question.type === 'single' ? updateAnswer(option.id) : toggleMulti(option.id)}
+                    onClick={() =>
+                      question.type === 'single'
+                        ? updateAnswer(option.id)
+                        : toggleMulti(option.id)
+                    }
                   >
-                    <span className="option-bullet">{String.fromCharCode(65 + idx)}</span>
+                    <span className="option-bullet">
+                      {String.fromCharCode(65 + idx)}
+                    </span>
                     <MathText text={option.text} />
                   </button>
                 );
@@ -682,25 +1092,64 @@ function Player({ quiz, settings, onExit, onEdit, onFinish, notify }) {
             </div>
           )}
 
-          {settings.allowCheck && check?.result !== null && check?.result !== undefined && (
-            <div className={`feedback ${check.result ? 'good' : 'bad'}`}>
-              <strong>{check.result ? 'Correct.' : 'Not quite.'}</strong>
-              {!check.result && <span> Correct answer: {correctAnswerText(question)}</span>}
-            </div>
-          )}
+          {settings.allowCheck &&
+            check?.result !== null &&
+            check?.result !== undefined && (
+              <div className={`feedback ${check.result ? 'good' : 'bad'}`}>
+                <strong>{check.result ? 'Correct.' : 'Not quite.'}</strong>
+                {!check.result && (
+                  <span> Correct answer: {correctAnswerText(question)}</span>
+                )}
+              </div>
+            )}
 
-          {question.explanation && check?.result !== undefined && check?.result !== null && (
-            <div className="explanation"><strong>Explanation:</strong> <MathText text={question.explanation} /></div>
-          )}
-
+          {settings.allowCheck &&
+            question.explanation &&
+            check?.result !== undefined &&
+            check?.result !== null && (
+              <div className="explanation">
+                <strong>Explanation:</strong>{' '}
+                <MathText text={question.explanation} />
+              </div>
+            )}
           <div className="footer-actions split">
-            <button className="btn secondary" disabled={currentIndex === 0} onClick={() => setCurrentIndex((i) => Math.max(0, i - 1))}>Previous</button>
+            <button
+              className="btn secondary"
+              disabled={currentIndex === 0}
+              onClick={() => setCurrentIndex((i) => Math.max(0, i - 1))}
+            >
+              Previous
+            </button>
             <div className="inline-actions">
-              {settings.allowCheck && <button className="btn primary" disabled={!isAnswered(question, answer) || locked} onClick={checkAnswer}>Check answer</button>}
+              {settings.allowCheck && (
+                <button
+                  className="btn primary"
+                  disabled={!isAnswered(question, answer) || locked}
+                  onClick={checkAnswer}
+                >
+                  Check answer
+                </button>
+              )}
               {currentIndex < questions.length - 1 ? (
-                <button className="btn dark" onClick={() => setCurrentIndex((i) => Math.min(questions.length - 1, i + 1))}>Next</button>
+                <button
+                  className="btn dark"
+                  onClick={() =>
+                    setCurrentIndex((i) =>
+                      Math.min(questions.length - 1, i + 1)
+                    )
+                  }
+                >
+                  Next
+                </button>
               ) : (
-                <button className="btn dark" onClick={() => { if (confirm('Finish and submit this quiz?')) submit(); }}>Finish</button>
+                <button
+                  className="btn dark"
+                  onClick={() => {
+                    if (confirm('Finish and submit this quiz?')) submit();
+                  }}
+                >
+                  Finish
+                </button>
               )}
             </div>
           </div>
@@ -716,23 +1165,43 @@ function Results({ result, onHome, onReplay, onDownload }) {
       <section className="panel result-hero">
         <p className="eyebrow">Quiz complete</p>
         <h1>{result.score}%</h1>
-        <p>{result.correctAnswers} / {result.totalQuestions} correct · {result.quizTitle}</p>
+        <p>
+          {result.correctAnswers} / {result.totalQuestions} correct ·{' '}
+          {result.quizTitle}
+        </p>
         <div className="footer-actions centered">
-          <button className="btn primary" onClick={onReplay}>Play again</button>
-          <button className="btn secondary" onClick={onDownload}>Download result</button>
-          <button className="btn ghost" onClick={onHome}>Home</button>
+          <button className="btn primary" onClick={onReplay}>
+            Play again
+          </button>
+          <button className="btn secondary" onClick={onDownload}>
+            Download result
+          </button>
+          <button className="btn ghost" onClick={onHome}>
+            Home
+          </button>
         </div>
       </section>
       <section className="review-list">
         {result.rows.map((row, index) => (
-          <article key={row.questionId} className={`panel review-card ${row.correct ? 'correct' : 'wrong'}`}>
+          <article
+            key={row.questionId}
+            className={`panel review-card ${row.correct ? 'correct' : 'wrong'}`}
+          >
             <div className="question-meta">
               <span className="badge">Question {index + 1}</span>
-              <span className={`badge ${row.correct ? 'success' : 'danger-soft'}`}>{row.correct ? 'Correct' : 'Wrong'}</span>
+              <span
+                className={`badge ${row.correct ? 'success' : 'danger-soft'}`}
+              >
+                {row.correct ? 'Correct' : 'Wrong'}
+              </span>
             </div>
             <MathText text={row.content} />
-            <p><strong>Your answer:</strong> {row.userAnswer || '—'}</p>
-            <p><strong>Correct answer:</strong> {row.correctAnswer || '—'}</p>
+            <p>
+              <strong>Your answer:</strong> {row.userAnswer || '—'}
+            </p>
+            <p>
+              <strong>Correct answer:</strong> {row.correctAnswer || '—'}
+            </p>
           </article>
         ))}
       </section>

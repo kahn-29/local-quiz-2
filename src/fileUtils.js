@@ -4,7 +4,8 @@ export function readFileAsText(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result || ''));
-    reader.onerror = () => reject(reader.error || new Error('Failed to read file.'));
+    reader.onerror = () =>
+      reject(reader.error || new Error('Failed to read file.'));
     reader.readAsText(file);
   });
 }
@@ -13,7 +14,8 @@ export function readFileAsDataUrl(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result || ''));
-    reader.onerror = () => reject(reader.error || new Error('Failed to read file.'));
+    reader.onerror = () =>
+      reject(reader.error || new Error('Failed to read file.'));
     reader.readAsDataURL(file);
   });
 }
@@ -21,11 +23,16 @@ export function readFileAsDataUrl(file) {
 export async function importQuizFile(file) {
   const text = await readFileAsText(file);
   const parsed = JSON.parse(text);
-  return normalizeQuiz(parsed, file.name.replace(/\.json$/i, '') || 'Imported Quiz');
+  return normalizeQuiz(
+    parsed,
+    file.name.replace(/\.json$/i, '') || 'Imported Quiz'
+  );
 }
 
 export function downloadJson(data, filename) {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json;charset=utf-8' });
+  const blob = new Blob([JSON.stringify(data, null, 2)], {
+    type: 'application/json;charset=utf-8',
+  });
   downloadBlob(blob, filename);
 }
 
