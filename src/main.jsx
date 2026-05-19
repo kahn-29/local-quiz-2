@@ -689,7 +689,7 @@ function Player({ quiz, settings, onExit, onEdit, onFinish, notify }) {
             </div>
           )}
 
-          {question.explanation && (check?.result !== undefined || !settings.allowCheck) && (
+          {question.explanation && check?.result !== undefined && check?.result !== null && (
             <div className="explanation"><strong>Explanation:</strong> <MathText text={question.explanation} /></div>
           )}
 
