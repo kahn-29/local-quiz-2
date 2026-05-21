@@ -900,6 +900,38 @@ function Player({ quiz, settings, onExit, onEdit, onFinish, notify }) {
     isAnswered(q, answers[q.id])
   ).length;
 
+  function isEditableTarget(target) {
+    if (!(target instanceof HTMLElement)) return false;
+    return (
+      target.isContentEditable ||
+      ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)
+    );
+  }
+
+  function goToNextQuestion() {
+    if (currentIndex < questions.length - 1) {
+      setCurrentIndex((i) => Math.min(questions.length - 1, i + 1));
+      return;
+    }
+    if (confirm('Finish and submit this quiz?')) submit();
+  }
+
+  function goToPreviousQuestion() {
+    if (currentIndex > 0) {
+      setCurrentIndex((i) => Math.max(0, i - 1));
+    }
+  }
+
+  function chooseOptionByIndex(optionIndex) {
+    const option = question.options[optionIndex];
+    if (!option) return;
+    if (question.type === 'single') {
+      updateAnswer(option.id);
+      return;
+    }
+    toggleMulti(option.id);
+  }
+
   useEffect(() => {
     saveActiveSession({
       quizId: quiz.id,
@@ -924,6 +956,50 @@ function Player({ quiz, settings, onExit, onEdit, onFinish, notify }) {
     return () => clearInterval(timer);
   }, [remaining]);
 
+  useEffect(() => {
+    function handleKeyDown(event) {
+      const key = event.key;
+      const isOptionKey = /^[a-d]$/i.test(key);
+
+      if (key === 'ArrowLeft') {
+        event.preventDefault();
+        event.stopPropagation();
+        goToPreviousQuestion();
+        return;
+      }
+
+      if (key === 'ArrowRight') {
+        event.preventDefault();
+        event.stopPropagation();
+        goToNextQuestion();
+        return;
+      }
+
+      if (key === 'Enter') {
+        event.preventDefault();
+        if (event.shiftKey) {
+          if (settings.allowCheck && !locked && isAnswered(question, answer)) {
+            checkAnswer();
+          }
+          return;
+        }
+        goToNextQuestion();
+        return;
+      }
+
+      if (!isOptionKey || isEditableTarget(event.target)) return;
+      if (question.type === 'text') return;
+
+      const optionIndex = key.toLowerCase().charCodeAt(0) - 97;
+      if (optionIndex < 0 || optionIndex > 3) return;
+      event.preventDefault();
+      chooseOptionByIndex(optionIndex);
+    }
+
+    document.addEventListener('keydown', handleKeyDown, true);
+    return () => document.removeEventListener('keydown', handleKeyDown, true);
+  }, [answer, checkAnswer, locked, question, settings.allowCheck]);
+
   function updateAnswer(value) {
     if (locked) return;
     setAnswers((current) => ({ ...current, [question.id]: value }));
@@ -945,6 +1021,7 @@ function Player({ quiz, settings, onExit, onEdit, onFinish, notify }) {
   }
 
   function checkAnswer() {
+    if (locked) return;
     if (!isAnswered(question, answer)) return;
     const result = isAnswerCorrect(question, answer);
     setChecks((current) => ({
