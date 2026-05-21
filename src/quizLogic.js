@@ -275,6 +275,7 @@ export function createResultPayload({
       correctAnswer: correctAnswerText(question),
       correct,
       checkedResult: checks[question.id]?.result ?? null,
+      explanation: question.explanation || '',
     };
   });
   const correctCount = rows.filter((r) => r.correct).length;

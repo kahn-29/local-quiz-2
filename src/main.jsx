@@ -899,6 +899,7 @@ function Player({ quiz, settings, onExit, onEdit, onFinish, notify }) {
   const answeredCount = questions.filter((q) =>
     isAnswered(q, answers[q.id])
   ).length;
+  const [showExplanation, setShowExplanation] = useState({});
 
   function isEditableTarget(target) {
     if (!(target instanceof HTMLElement)) return false;
@@ -1180,15 +1181,22 @@ function Player({ quiz, settings, onExit, onEdit, onFinish, notify }) {
               </div>
             )}
 
-          {settings.allowCheck &&
-            question.explanation &&
-            check?.result !== undefined &&
-            check?.result !== null && (
-              <div className="explanation">
-                <strong>Explanation:</strong>{' '}
-                <MathText text={question.explanation} />
-              </div>
-            )}
+          {settings.allowCheck && question.explanation && check?.result !== undefined && check?.result !== null && (
+            <div className="explanation-toggle">
+              <button
+                className="btn ghost"
+                onClick={() => setShowExplanation((s) => ({ ...s, [question.id]: !s[question.id] }))}
+              >
+                {showExplanation[question.id] ? 'Hide explanation' : 'Show explanation'}
+              </button>
+              {showExplanation[question.id] && (
+                <div className="explanation">
+                  <strong>Explanation:</strong>{' '}
+                  <MathText text={question.explanation} />
+                </div>
+              )}
+            </div>
+          )}
           <div className="footer-actions split">
             <button
               className="btn secondary"
@@ -1237,6 +1245,7 @@ function Player({ quiz, settings, onExit, onEdit, onFinish, notify }) {
 }
 
 function Results({ result, onHome, onReplay, onDownload }) {
+  const [visible, setVisible] = useState({});
   return (
     <main className="shell results-shell">
       <section className="panel result-hero">
@@ -1279,6 +1288,22 @@ function Results({ result, onHome, onReplay, onDownload }) {
             <p>
               <strong>Correct answer:</strong> {row.correctAnswer || '—'}
             </p>
+            {row.explanation && (
+              <div>
+                <button
+                  className="btn ghost"
+                  onClick={() => setVisible((v) => ({ ...v, [row.questionId]: !v[row.questionId] }))}
+                >
+                  {visible[row.questionId] ? 'Hide explanation' : 'Show explanation'}
+                </button>
+                {visible[row.questionId] && (
+                  <div className="explanation">
+                    <strong>Explanation:</strong>{' '}
+                    <MathText text={row.explanation} />
+                  </div>
+                )}
+              </div>
+            )}
           </article>
         ))}
       </section>
